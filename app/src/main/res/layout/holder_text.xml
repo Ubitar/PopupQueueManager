@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:textSize="16dp"
+    android:paddingVertical="6dp"
+    tools:text="这里显示信息"
+    android:id="@+id/txt"
+    android:paddingHorizontal="15dp"
+    tools:background="#f0f0f0"
+    android:layout_height="wrap_content">
+
+</TextView>

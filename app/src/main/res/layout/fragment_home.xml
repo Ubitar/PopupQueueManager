@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnOnePopup"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="显示一个弹窗"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btnTwoPopup"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="显示两个弹窗"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btnThreePopup"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="显示三个弹窗"
+        android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/txtClear"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:textSize="15dp"
+        android:textColor="#999999"
+        android:text="行为记录（点击此处清空）" />
+
+    <View
+        android:layout_width="match_parent"
+        android:background="#999999"
+        android:layout_height="0.5dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:paddingVertical="5dp"
+        android:clipToPadding="false"
+        tools:itemCount="5"
+        tools:listitem="@layout/holder_text"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp" />
+
+</LinearLayout>
