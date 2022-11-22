@@ -87,6 +87,7 @@ class QueueDelegate(
 
     private fun postToNextTask() {
         if (mCurrentTask != null) return
+        if (mQueue.isEmpty()) return
         onDoingNextTask()
     }
 
