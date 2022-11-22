@@ -76,29 +76,24 @@ class QueueDelegate(
     }
 
     override fun clear() {
-        if (getCurrentSize() <= 0) return
-        if (mCurrentTask == mQueue.peek()) {
-            mQueue.filter { it != mCurrentTask }
-                .also { mQueue.removeAll(it) }
-        } else {
-            mQueue.clear()
-        }
+        mQueue.clear()
     }
 
     private fun postToNextTask() {
         if (mCurrentTask != null) return
-        if (mQueue.isEmpty()) return
+        if (getCurrentSize() <= 0) return
         onDoingNextTask()
     }
 
     private fun onDoingNextTask() {
         val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
-
         if (mQueue.isEmpty()) {
             if (isStopAfterFinish) mIsRunning = false
             mOnGroupFinishListeners.forEach { it.second.invoke(mGroup) }
             return
         }
+
+        if(!mIsRunning) return
 
         val isInterruptGroup = onDispatchInterruptGroup()
         if (isInterruptGroup) {
@@ -106,23 +101,23 @@ class QueueDelegate(
             return
         }
 
-        val nextTask = mQueue.peek() ?: return
-        mCurrentTask = nextTask
+        val currentTask = mQueue.poll() ?: return
+        mCurrentTask = currentTask
 
-        onBeforeNextTask(nextTask) {
+        onBeforeNextTask(currentTask) {
 
-            val isIntercept = onDispatchInterceptTask(nextTask)
+            val isIntercept = onDispatchInterceptTask(currentTask)
 
             if (isIntercept) {
                 onInterceptTask()
                 return@onBeforeNextTask
             }
 
-            onRealNextTask(nextTask) {
+            onRealCurrentTask(currentTask) {
 
-                onAfterNextTask(nextTask) {
+                onAfterCurrentTask(currentTask) {
 
-                    onFinishThisTask()
+                    onFinishCurrentTask()
 
                     onDoingNextTask()
 
@@ -172,7 +167,7 @@ class QueueDelegate(
         }
     }
 
-    private fun onRealNextTask(currentTask: ITask, onComplete: () -> Unit) {
+    private fun onRealCurrentTask(currentTask: ITask, onComplete: () -> Unit) {
         val onCreatedPopup = fun(task: ITask, popup: IQueuePopup?) {
             if (popup == null) {
                 clearCurrentTask()
@@ -214,7 +209,7 @@ class QueueDelegate(
         }
     }
 
-    private fun onAfterNextTask(task: ITask, onComplete: () -> Unit) {
+    private fun onAfterCurrentTask(task: ITask, onComplete: () -> Unit) {
         val afterTaskDelay = Math.max(
             mGroup.getAfterTaskDelay(),
             task.getAfterDelay()
@@ -230,12 +225,11 @@ class QueueDelegate(
         }
     }
 
-    private fun onFinishThisTask() {
+    private fun onFinishCurrentTask() {
         clearCurrentTask()
     }
 
     private fun clearCurrentTask() {
-        mQueue.poll()
         mCurrentTask = null
     }
 
