@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
 }
 
 android {
@@ -22,11 +23,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 }
 
@@ -37,4 +38,17 @@ dependencies {
     testCompileOnly 'junit:junit:4.13.2'
     androidTestCompileOnly 'androidx.test.ext:junit:1.1.4'
     androidTestCompileOnly 'androidx.test.espresso:espresso-core:3.5.0'
+}
+
+project.afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.ubitar.manager.pqm'
+                artifactId = 'PopupQueueManager'
+                version = '1.0.0'
+            }
+        }
+    }
 }
