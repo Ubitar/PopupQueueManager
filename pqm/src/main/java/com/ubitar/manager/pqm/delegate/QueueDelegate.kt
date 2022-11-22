@@ -42,6 +42,7 @@ class QueueDelegate(
      */
     private val mHandler = Handler(Looper.getMainLooper())
 
+    /** 入栈新的任务 */
     override fun push(task: ITask) {
         mQueue.add(task)
         if (mQueue is List<*>)
@@ -49,6 +50,7 @@ class QueueDelegate(
         if (mIsRunning) postToNextTask()
     }
 
+    /** 入栈新的任务且运行队列 */
     override fun pushAndStart(task: ITask) {
         mQueue.add(task)
         if (mQueue is List<*>)
@@ -57,34 +59,41 @@ class QueueDelegate(
         else start()
     }
 
+    /** 开始运行队列 */
     override fun start() {
         mIsRunning = true
         postToNextTask()
     }
 
+    /** 停止运行队列 */
     override fun stop() {
         if (!mIsRunning) return
         mIsRunning = false
     }
 
+    /** 当前队列大小 */
     override fun getCurrentSize(): Int {
         return mQueue.size
     }
 
+    /** 队列是否在运行 */
     override fun isRunning(): Boolean {
         return mIsRunning
     }
 
+    /** 清空队列 */
     override fun clear() {
         mQueue.clear()
     }
 
+    /** 预备开始下一个任务 */
     private fun postToNextTask() {
         if (mCurrentTask != null) return
         if (getCurrentSize() <= 0) return
         onDoingNextTask()
     }
 
+    /** 正在进行下一个任务 */
     private fun onDoingNextTask() {
         val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
         if (mQueue.isEmpty()) {
@@ -126,6 +135,7 @@ class QueueDelegate(
         }
     }
 
+    /** 分发是否终止当前分组的监听 */
     private fun onDispatchInterruptGroup(): Boolean {
         return mOnInterruptGroupListeners.any { it.second.invoke(mGroup) }
             .also {
@@ -133,19 +143,23 @@ class QueueDelegate(
             }
     }
 
+    /** 分发是否拦截当前任务的监听 */
     private fun onDispatchInterceptTask(task: ITask): Boolean {
         return mOnInterceptTaskListeners.any { it.second.invoke(mGroup, task) }
     }
 
+    /** 终止当前组 */
     private fun onInterruptGroup() {
         //nothing
     }
 
+    /** 拦截当前任务 */
     private fun onInterceptTask() {
         clearCurrentTask()
         onDoingNextTask()
     }
 
+    /** 任务开始前 */
     private fun onBeforeNextTask(task: ITask, onComplete: () -> Unit) {
         val beforeTaskDelay = Math.max(
             mGroup.getBeforeTaskDelay(),
@@ -167,6 +181,7 @@ class QueueDelegate(
         }
     }
 
+    /** 真正执行当前任务 */
     private fun onRealCurrentTask(currentTask: ITask, onComplete: () -> Unit) {
         val onCreatedPopup = fun(task: ITask, popup: IQueuePopup?) {
             if (popup == null) {
@@ -209,6 +224,7 @@ class QueueDelegate(
         }
     }
 
+    /** 当前任务执行后 */
     private fun onAfterCurrentTask(task: ITask, onComplete: () -> Unit) {
         val afterTaskDelay = Math.max(
             mGroup.getAfterTaskDelay(),
@@ -225,14 +241,17 @@ class QueueDelegate(
         }
     }
 
+    /** 完成该任务后 */
     private fun onFinishCurrentTask() {
         clearCurrentTask()
     }
 
+    /** 清除当前任务 */
     private fun clearCurrentTask() {
         mCurrentTask = null
     }
 
+    /** 延迟器 */
     private fun delayWith(delay: Long, onComplete: () -> Unit): Timer {
         return Timer().also {
             it.schedule(object : TimerTask() {

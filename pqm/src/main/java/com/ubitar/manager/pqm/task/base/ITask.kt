@@ -7,19 +7,25 @@ import com.ubitar.manager.pqm.popup.IQueuePopup
  */
 interface ITask {
 
+    /** 是否是异步任务 */
     fun isAsync(): Boolean
 
+    /** 任务开始前的延迟 */
     fun getBeforeDelay(): Long = -1
 
+    /** 任务结束后的延迟 */
     fun getAfterDelay(): Long = -1
 
-    fun show( popup: IQueuePopup)
+    /** 显示弹窗 */
+    fun show(popup: IQueuePopup)
 
+    /** 任务优先级 */
     fun getPriority(): Int = DEFAULT_PRIORITY
 
     fun getTag(): String? = null
 
     companion object {
+        //默认的优先级
         const val DEFAULT_PRIORITY = 1000
     }
 

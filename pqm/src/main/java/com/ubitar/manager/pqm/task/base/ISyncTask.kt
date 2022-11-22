@@ -7,8 +7,10 @@ import com.ubitar.manager.pqm.popup.IQueuePopup
  */
 interface ISyncTask : ITask {
 
+    /** 是否是异步任务 */
     override fun isAsync(): Boolean = false
 
+    /** 创建弹窗 */
     fun onCreatePopup(): IQueuePopup?
 
 }
