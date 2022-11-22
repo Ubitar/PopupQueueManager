@@ -36,7 +36,7 @@ object PopupQueueManager {
         mOnAllGroupFinishListeners.removeAt(index)
     }
 
-    fun observeOnAllGroupFinish(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
+    fun observeOnAllGroupFinishListener(lifecycleOwner: LifecycleOwner, listener: () -> Unit) {
         removeObserveOnAllGroupFinish(lifecycleOwner)
         removeObserveWhenDestroy(lifecycleOwner) {
             removeObserveOnAllGroupFinish(lifecycleOwner)

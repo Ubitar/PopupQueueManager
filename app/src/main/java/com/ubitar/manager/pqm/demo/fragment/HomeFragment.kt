@@ -120,7 +120,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun initQueueManager() {
-        PopupQueueManager.observeOnAllGroupFinish(viewLifecycleOwner) {
+        PopupQueueManager.observeOnAllGroupFinishListener(viewLifecycleOwner) {
             mTextAdapter.addData(0, "所有队列已播放完毕")
             scrollToTop()
         }
