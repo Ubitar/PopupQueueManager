@@ -144,9 +144,6 @@ class QueueDelegate(
     /** 分发是否终止当前分组的监听 */
     private fun onDispatchInterruptGroup(): Boolean {
         return mOnInterruptGroupListeners.any { it.second.invoke(mGroup) }
-            .also {
-                if (it) stop()
-            }
     }
 
     /** 分发是否拦截当前任务的监听 */
@@ -156,7 +153,7 @@ class QueueDelegate(
 
     /** 终止当前组 */
     private fun onInterruptGroup() {
-        //nothing
+        stop()
     }
 
     /** 拦截当前任务 */
