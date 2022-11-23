@@ -246,12 +246,12 @@ class QueueDelegate(
 
     /** 完成该任务后 */
     private fun onFinishCurrentTask() {
-        mQueue.poll()
         clearCurrentTask()
     }
 
     /** 清除当前任务 */
     private fun clearCurrentTask() {
+        mQueue.poll()
         mCurrentTask = null
     }
 
