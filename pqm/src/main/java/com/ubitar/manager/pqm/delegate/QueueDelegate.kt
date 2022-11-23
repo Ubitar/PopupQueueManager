@@ -2,6 +2,7 @@ package com.ubitar.manager.pqm.delegate
 
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
 import com.ubitar.manager.pqm.PopupQueueManager
 import com.ubitar.manager.pqm.group.IGroup
@@ -61,6 +62,7 @@ class QueueDelegate(
 
     /** 开始运行队列 */
     override fun start() {
+        if (mIsRunning) return
         mIsRunning = true
         postToNextTask()
     }
@@ -88,12 +90,16 @@ class QueueDelegate(
 
     /** 预备开始下一个任务 */
     private fun postToNextTask() {
-        if (mCurrentTask != null) return
-        if (getCurrentSize() <= 0) return
-        onDoingNextTask()
+        mHandler.post {
+            if (!mIsRunning) return@post
+            if (mCurrentTask != null) return@post
+            if (getCurrentSize() <= 0) return@post
+            onDoingNextTask()
+        }
     }
 
     /** 正在进行下一个任务 */
+    @MainThread
     private fun onDoingNextTask() {
         val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
         if (mQueue.isEmpty()) {
@@ -102,7 +108,7 @@ class QueueDelegate(
             return
         }
 
-        if(!mIsRunning) return
+        if (!mIsRunning) return
 
         val isInterruptGroup = onDispatchInterruptGroup()
         if (isInterruptGroup) {
