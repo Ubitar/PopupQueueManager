@@ -49,7 +49,7 @@ class HomeFragment : Fragment() {
             PopupQueueManager.getDefault()
                 .push(object : QueueTask() {
                     override fun onCreatePopup(): IQueuePopup? {
-                        return ColorDialog( Color.RED)
+                        return ColorDialog(Color.RED)
                     }
 
                     override fun show(popup: IQueuePopup) {
@@ -126,29 +126,29 @@ class HomeFragment : Fragment() {
         }
         PopupQueueManager.getDefault()
             .observeOnGroupFinishListener(viewLifecycleOwner) {
-            mTextAdapter.addData(0, "当前默认队列已播放完毕")
-            scrollToTop()
-        }
+                mTextAdapter.addData(0, "当前默认队列已播放完毕")
+                scrollToTop()
+            }
         PopupQueueManager.getDefault()
             //同一次Task会多次执行此回调
             .observeOnInterruptGroupListener(viewLifecycleOwner) {
-            mTextAdapter.addData(0, "是否要终止本组 此次false")
-            scrollToTop()
-            //返回false时会继续运行弹窗队列，返回true是会停止弹窗队列
-            false
-        }
+                mTextAdapter.addData(0, "是否要终止本组 此次false")
+                scrollToTop()
+                //返回false时会继续运行弹窗队列，返回true是会停止弹窗队列
+                false
+            }
         PopupQueueManager.getDefault()
             .observeOnInterceptTaskListener(viewLifecycleOwner) { group, task ->
-            mTextAdapter.addData(0, "是否要拦截本次弹窗 此次false")
-            scrollToTop()
-            //返回false时会继续执行下一个任务，返回true是会跳过下一个任务
-            false
-        }
+                mTextAdapter.addData(0, "是否要拦截本次弹窗 此次false")
+                scrollToTop()
+                //返回false时会继续执行下一个任务，返回true是会跳过下一个任务
+                false
+            }
         PopupQueueManager.getDefault()
             .observeOnNextTaskListener(viewLifecycleOwner) { group, task, popup ->
-            mTextAdapter.addData(0, "开始显示下一弹窗，现队列中的数量:${group.getCurrentSize()}个")
-            scrollToTop()
-        }
+                mTextAdapter.addData(0, "开始显示下一弹窗，现队列中的数量:${group.getCurrentSize()}个（包含当前弹窗）")
+                scrollToTop()
+            }
     }
 
     private fun showPopup(popup: BasePopupView) {
@@ -158,11 +158,11 @@ class HomeFragment : Fragment() {
             .show()
     }
 
-    private fun showDialog(dialog:DialogFragment) {
-           dialog.show(childFragmentManager,dialog.tag)
+    private fun showDialog(dialog: DialogFragment) {
+        dialog.show(childFragmentManager, dialog.tag)
     }
 
-    private fun scrollToTop(){
+    private fun scrollToTop() {
         mBinding.recyclerView.post {
             (mBinding.recyclerView.layoutManager as LinearLayoutManager).also {
                 it.scrollToPosition(0)

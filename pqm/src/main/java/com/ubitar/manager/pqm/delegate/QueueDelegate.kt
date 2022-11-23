@@ -110,7 +110,7 @@ class QueueDelegate(
             return
         }
 
-        val currentTask = mQueue.poll() ?: return
+        val currentTask = mQueue.peek() ?: return
         mCurrentTask = currentTask
 
         onBeforeNextTask(currentTask) {
@@ -243,6 +243,7 @@ class QueueDelegate(
 
     /** 完成该任务后 */
     private fun onFinishCurrentTask() {
+        mQueue.poll()
         clearCurrentTask()
     }
 
