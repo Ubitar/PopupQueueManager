@@ -5,7 +5,7 @@ import com.ubitar.manager.pqm.popup.IQueuePopup
 /**
  * 异步的弹窗队列
  */
-interface IAsyncTask: ITask {
+interface IAsyncTask : ITask ,ITaskRetry{
 
     /** 是否是异步任务 */
     override fun isAsync(): Boolean = true

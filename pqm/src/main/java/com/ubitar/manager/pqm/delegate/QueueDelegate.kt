@@ -9,6 +9,7 @@ import com.ubitar.manager.pqm.group.IGroup
 import com.ubitar.manager.pqm.popup.IQueuePopup
 import com.ubitar.manager.pqm.proxy.PopupQueueProxy
 import com.ubitar.manager.pqm.task.base.IAsyncTask
+import com.ubitar.manager.pqm.task.base.ITaskRetry
 import com.ubitar.manager.pqm.task.base.ISyncTask
 import com.ubitar.manager.pqm.task.base.ITask
 import java.util.*
@@ -98,9 +99,12 @@ class QueueDelegate(
         }
     }
 
-    /** 正在进行下一个任务 */
+    /**
+     *  正在进行下一个任务
+     * @param isRetry 是否是重试任务
+     * */
     @MainThread
-    private fun onDoingNextTask() {
+    private fun onDoingNextTask(isRetry: Boolean = false) {
         val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
         if (mQueue.isEmpty()) {
             if (isStopAfterFinish) mIsRunning = false
@@ -128,7 +132,7 @@ class QueueDelegate(
                 return@onBeforeNextTask
             }
 
-            onRealCurrentTask(currentTask) {
+            onRealCurrentTask(currentTask, isRetry) {
 
                 onAfterCurrentTask(currentTask) {
 
@@ -184,24 +188,37 @@ class QueueDelegate(
         }
     }
 
-    /** 真正执行当前任务 */
-    private fun onRealCurrentTask(currentTask: ITask, onComplete: () -> Unit) {
-        val onCreatedPopup = fun(task: ITask, popup: IQueuePopup?) {
-            if (popup == null) {
-                clearCurrentTask()
-                onDoingNextTask()
-                return
-            } else {
-                popup.onCatchQueueProxy(PopupQueueProxy {
-                    onComplete.invoke()
-                })
-                mOnNextTaskListeners.forEach {
-                    it.second.invoke(mGroup, task, popup)
-                }
-                task.show(popup)
-                return
+    /**
+     * 真正执行当前任务
+     * @param isRetry 是否是重试任务
+     * */
+    private fun onRealCurrentTask(currentTask: ITask, isRetry: Boolean, onComplete: () -> Unit) {
+        val onCreatedPopup = fun(task: ITask, popup: IQueuePopup) {
+            popup.onCatchQueueProxy(PopupQueueProxy {
+                onComplete.invoke()
+            })
+            mOnNextTaskListeners.forEach {
+                it.second.invoke(mGroup, task, popup)
             }
+            task.show(popup)
+            return
+        }
+        val onFailPopup = fun(task: ITask) {
+             if (task is ITaskRetry) {
+                if (task.getRetryCount() > task.getCurrentRetryCount()){
+                    resetCurrentTask()
+                    onDoingNextTask(true)
+                } else onComplete.invoke()
+            }
+        }
+        val onCancelPopup = fun(task: ITask) {
+            onComplete.invoke()
+        }
 
+        if (isRetry) {
+            if (currentTask is ITaskRetry) {
+                currentTask.plushOneRetryCount()
+            }
         }
 
         when (currentTask) {
@@ -212,17 +229,19 @@ class QueueDelegate(
                     }
 
                     override fun onCreateFail() {
-                        onCreatedPopup.invoke(currentTask, null)
+                        onFailPopup.invoke(currentTask)
                     }
 
                     override fun onCreateCancel() {
-                        onCreatedPopup.invoke(currentTask, null)
+                        onCancelPopup.invoke(currentTask)
                     }
 
                 })
             }
             is ISyncTask -> {
-                onCreatedPopup.invoke(currentTask, currentTask.onCreatePopup())
+                val popup = currentTask.onCreatePopup()
+                if (popup == null) onCancelPopup.invoke(currentTask)
+                else onCreatedPopup.invoke(currentTask, popup)
             }
         }
     }
@@ -247,6 +266,11 @@ class QueueDelegate(
     /** 完成该任务后 */
     private fun onFinishCurrentTask() {
         clearCurrentTask()
+    }
+
+    /** 重试前重置当前任务 */
+    private fun resetCurrentTask(){
+        mCurrentTask = null
     }
 
     /** 清除当前任务 */
