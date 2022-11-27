@@ -3,47 +3,31 @@ package com.ubitar.manager.pqm.delegate
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.MainThread
-import androidx.lifecycle.LifecycleOwner
 import com.ubitar.manager.pqm.PopupQueueManager
-import com.ubitar.manager.pqm.group.IGroup
+import com.ubitar.manager.pqm.group.QueueGroup
 import com.ubitar.manager.pqm.popup.IQueuePopup
 import com.ubitar.manager.pqm.proxy.PopupQueueProxy
 import com.ubitar.manager.pqm.task.base.IAsyncTask
-import com.ubitar.manager.pqm.task.base.ITaskRetry
 import com.ubitar.manager.pqm.task.base.ISyncTask
 import com.ubitar.manager.pqm.task.base.ITask
+import com.ubitar.manager.pqm.task.base.ITaskRetry
 import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
 
 class QueueDelegate(
-    private val mGroup: IGroup,
+    private val mGroup: QueueGroup,
     private val mQueue: Queue<ITask>,
-    private val mOnGroupFinishListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>,
-    private val mOnInterruptGroupListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Boolean>>,
-    private val mOnInterceptTaskListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask) -> Boolean>>,
-    private val mOnNextTaskListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask, popup: IQueuePopup) -> Unit>>,
-    private val mOnBeforeClearListeners : CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>,
-    private val mOnAfterClearListeners : CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>
-    ) : IDelegate {
+) : IDelegate {
 
-    /**
-     * 队列是否正在运行
-     */
+    /** 队列是否正在运行 */
     private var mIsRunning = false
 
-    /**
-     * 当前正在执行的任务
-     */
+    /** 当前正在执行的任务 */
     private var mCurrentTask: ITask? = null
 
-    /**
-     * 延时计时器
-     */
+    /** 延时计时器 */
     private var mDelayTimer: Timer? = null
 
-    /**
-     * 主线程回调Handler
-     */
+    /** 主线程回调Handler */
     private val mHandler = Handler(Looper.getMainLooper())
 
     /** 入栈新的任务 */
@@ -91,10 +75,10 @@ class QueueDelegate(
      *  @param withCurrent 是否包含当前正在运行的弹窗任务（注：为true时也不会自动关闭当前弹窗，只能清除正在运行的任务）
      */
     override fun clear(withCurrent: Boolean) {
-        mOnBeforeClearListeners.forEach { it.second.invoke(mGroup) }
-        if(withCurrent) clearCurrentTask()
+        mGroup.mOnBeforeClearListeners.forEach { it.second.invoke(mGroup) }
+        if (withCurrent) clearCurrentTask()
         mQueue.clear()
-        mOnAfterClearListeners.forEach { it.second.invoke(mGroup) }
+        mGroup.mOnAfterClearListeners.forEach { it.second.invoke(mGroup) }
     }
 
     /** 预备开始下一个任务 */
@@ -116,7 +100,7 @@ class QueueDelegate(
         val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
         if (mQueue.isEmpty()) {
             if (isStopAfterFinish) mIsRunning = false
-            mOnGroupFinishListeners.forEach { it.second.invoke(mGroup) }
+            mGroup.mOnGroupFinishListeners.forEach { it.second.invoke(mGroup) }
             return
         }
 
@@ -155,12 +139,12 @@ class QueueDelegate(
 
     /** 分发是否终止当前分组的监听 */
     private fun onDispatchInterruptGroup(): Boolean {
-        return mOnInterruptGroupListeners.any { it.second.invoke(mGroup) }
+        return mGroup.mOnInterruptGroupListeners.any { it.second.invoke(mGroup) }
     }
 
     /** 分发是否拦截当前任务的监听 */
     private fun onDispatchInterceptTask(task: ITask): Boolean {
-        return mOnInterceptTaskListeners.any { it.second.invoke(mGroup, task) }
+        return mGroup.mOnInterceptTaskListeners.any { it.second.invoke(mGroup, task) }
     }
 
     /** 终止当前组 */
@@ -205,15 +189,15 @@ class QueueDelegate(
             popup.onCatchQueueProxy(PopupQueueProxy {
                 onComplete.invoke()
             })
-            mOnNextTaskListeners.forEach {
+            mGroup.mOnNextTaskListeners.forEach {
                 it.second.invoke(mGroup, task, popup)
             }
             task.show(popup)
             return
         }
         val onFailPopup = fun(task: ITask) {
-             if (task is ITaskRetry) {
-                if (task.getRetryCount() > task.getCurrentRetryCount()){
+            if (task is ITaskRetry) {
+                if (task.getRetryCount() > task.getCurrentRetryCount()) {
                     resetCurrentTask()
                     onDoingNextTask(true)
                 } else onComplete.invoke()
@@ -277,7 +261,7 @@ class QueueDelegate(
     }
 
     /** 重试前重置当前任务 */
-    private fun resetCurrentTask(){
+    private fun resetCurrentTask() {
         mCurrentTask = null
     }
 

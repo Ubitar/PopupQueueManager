@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.ubitar.manager.pqm.group.Groups
 import com.ubitar.manager.pqm.group.IGroup
 import com.ubitar.manager.pqm.group.LinkedQueueGroup
+import com.ubitar.manager.pqm.group.QueueGroup
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -14,18 +15,18 @@ object PopupQueueManager {
     private var mIsStopAfterFinish = false
 
     /** 分组列表 */
-    private val mGroupMap = ConcurrentHashMap<Groups, IGroup>()
+    private val mGroupMap = ConcurrentHashMap<Groups, QueueGroup>()
 
     /** 所有分组队列播放结束的监听列表 */
     private val mOnAllGroupFinishListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, () -> Unit>>()
 
     /** 获取默认分组 */
-    fun getDefault(): IGroup {
+    fun getDefault(): QueueGroup {
         return get(Groups.defaultGroup())
     }
 
     /** 获取指定分组 */
-    fun get(groups: Groups): IGroup {
+    fun get(groups: Groups): QueueGroup {
         return mGroupMap.getOrPut(groups) {
             onCreateNewGroups()
         }
@@ -78,7 +79,7 @@ object PopupQueueManager {
     }
 
     /** 创建新的分组 */
-    private fun onCreateNewGroups(): IGroup {
+    private fun onCreateNewGroups(): QueueGroup {
         val group = LinkedQueueGroup()
         //添加队列结束的监听
         group.addOnGroupFinishListener {
