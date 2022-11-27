@@ -218,9 +218,12 @@ class LinkedQueueGroup : IGroup {
         return mDelegate.isRunning()
     }
 
-    /** 清空队列 */
-    override fun clear() {
-        mDelegate.clear()
+    /**
+     *  清空队列
+     *  @param withCurrent 是否包含当前正在运行的弹窗任务（注：为true时也不会自动关闭当前弹窗，只能清除正在运行的任务）
+     */
+    override fun clear(withCurrent: Boolean) {
+        return mDelegate.clear(withCurrent)
     }
 
     /** 添加生命周期Destroy时移除监听的逻辑 */

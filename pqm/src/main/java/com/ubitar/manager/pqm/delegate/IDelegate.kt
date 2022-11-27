@@ -25,7 +25,10 @@ interface IDelegate {
     /** 队列是否在运行 */
     fun isRunning(): Boolean
 
-    /** 清空队列 */
-    fun clear()
+    /**
+     *  清空队列
+     *  @param withCurrent 是否包含当前正在运行的弹窗任务（注：为true时也不会自动关闭当前弹窗，只能清除正在运行的任务）
+     */
+    fun clear(withCurrent: Boolean = true)
 
 }
