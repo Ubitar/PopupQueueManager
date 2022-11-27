@@ -21,8 +21,10 @@ class QueueDelegate(
     private val mOnGroupFinishListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>,
     private val mOnInterruptGroupListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Boolean>>,
     private val mOnInterceptTaskListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask) -> Boolean>>,
-    private val mOnNextTaskListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask, popup: IQueuePopup) -> Unit>>
-) : IDelegate {
+    private val mOnNextTaskListeners: CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask, popup: IQueuePopup) -> Unit>>,
+    private val mOnBeforeClearListeners : CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>,
+    private val mOnAfterClearListeners : CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>
+    ) : IDelegate {
 
     /**
      * 队列是否正在运行
@@ -89,8 +91,10 @@ class QueueDelegate(
      *  @param withCurrent 是否包含当前正在运行的弹窗任务（注：为true时也不会自动关闭当前弹窗，只能清除正在运行的任务）
      */
     override fun clear(withCurrent: Boolean) {
+        mOnBeforeClearListeners.forEach { it.second.invoke(mGroup) }
         if(withCurrent) clearCurrentTask()
         mQueue.clear()
+        mOnAfterClearListeners.forEach { it.second.invoke(mGroup) }
     }
 
     /** 预备开始下一个任务 */

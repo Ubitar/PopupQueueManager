@@ -16,6 +16,8 @@ class LinkedQueueGroup : IGroup {
     private val mOnInterruptGroupListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Boolean>>()
     private val mOnInterceptTaskListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask) -> Boolean>>()
     private val mOnNextTaskListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup, task: ITask, popup: IQueuePopup) -> Unit>>()
+    private val mOnBeforeClearListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>()
+    private val mOnAfterClearListeners = CopyOnWriteArrayList<Pair<LifecycleOwner?, (group: IGroup) -> Unit>>()
 
     /** 任务开始前的延迟 */
     private var mBeforeDelay = -1L
@@ -33,7 +35,9 @@ class LinkedQueueGroup : IGroup {
             mOnGroupFinishListeners = mOnGroupFinishListeners,
             mOnInterruptGroupListeners = mOnInterruptGroupListeners,
             mOnInterceptTaskListeners = mOnInterceptTaskListeners,
-            mOnNextTaskListeners = mOnNextTaskListeners
+            mOnNextTaskListeners = mOnNextTaskListeners,
+            mOnBeforeClearListeners = mOnBeforeClearListeners,
+            mOnAfterClearListeners = mOnAfterClearListeners
         )
     }
 
@@ -59,6 +63,18 @@ class LinkedQueueGroup : IGroup {
     override fun addOnNextTaskListener(listener: (group: IGroup, task: ITask, popup: IQueuePopup) -> Unit) {
         removeOnNextTaskListener(listener)
         mOnNextTaskListeners.add(Pair(null, listener))
+    }
+
+    /** 添加清除队列前的监听 */
+    override fun addOnBeforeClearListener(listener: (group: IGroup) -> Unit) {
+        removeOnBeforeClearListener(listener)
+        mOnBeforeClearListeners.add(Pair(null, listener))
+    }
+
+    /** 添加清除队列后的监听 */
+    override fun addOnAfterClearListener(listener: (group: IGroup) -> Unit) {
+        removeOnAfterClearListener(listener)
+        mOnAfterClearListeners.add(Pair(null, listener))
     }
 
     /** 移除分组播放结束的监听 */
@@ -87,6 +103,20 @@ class LinkedQueueGroup : IGroup {
         val index = mOnNextTaskListeners.indexOfFirst { it.second == listener }
         if (index < 0) return
         mOnNextTaskListeners.removeAt(index)
+    }
+
+    /** 移除清除队列前的监听 */
+    override fun removeOnBeforeClearListener(listener: (group: IGroup) -> Unit) {
+        val index = mOnBeforeClearListeners.indexOfFirst { it.second == listener }
+        if (index < 0) return
+        mOnBeforeClearListeners.removeAt(index)
+    }
+
+    /** 移除清除队列后的监听 */
+    override fun removeOnAfterClearListener(listener: (group: IGroup) -> Unit) {
+        val index = mOnAfterClearListeners.indexOfFirst { it.second == listener }
+        if (index < 0) return
+        mOnAfterClearListeners.removeAt(index)
     }
 
     /** 添加分组播放结束的监听 */
@@ -125,6 +155,24 @@ class LinkedQueueGroup : IGroup {
         mOnNextTaskListeners.add(Pair(lifecycleOwner, listener))
     }
 
+    /** 添加清除队列前的监听 */
+    override fun observeOnBeforeClearListener(lifecycleOwner: LifecycleOwner, listener: (group: IGroup) -> Unit) {
+        removeObserveOnBeforeClearListener(lifecycleOwner)
+        removeObserveWhenDestroy(lifecycleOwner) {
+            removeObserveOnBeforeClearListener(lifecycleOwner)
+        }
+        mOnBeforeClearListeners.add(Pair(lifecycleOwner, listener))
+    }
+
+    /** 添加清除队列后的监听 */
+    override fun observeOnAfterClearListener(lifecycleOwner: LifecycleOwner, listener: (group: IGroup) -> Unit) {
+        removeObserveOnAfterClearListener(lifecycleOwner)
+        removeObserveWhenDestroy(lifecycleOwner) {
+            removeObserveOnAfterClearListener(lifecycleOwner)
+        }
+        mOnAfterClearListeners.add(Pair(lifecycleOwner, listener))
+    }
+
     /** 移除分组播放结束的监听 */
     override fun removeObserveOnGroupFinishListener(lifecycleOwner: LifecycleOwner) {
         val index = mOnGroupFinishListeners.indexOfFirst { it.first == lifecycleOwner }
@@ -151,6 +199,20 @@ class LinkedQueueGroup : IGroup {
         val index = mOnNextTaskListeners.indexOfFirst { it.first == lifecycleOwner }
         if (index < 0) return
         mOnNextTaskListeners.removeAt(index)
+    }
+
+    /** 移除清除队列前的监听 */
+    override fun removeObserveOnBeforeClearListener(lifecycleOwner: LifecycleOwner) {
+        val index = mOnBeforeClearListeners.indexOfFirst { it.first == lifecycleOwner }
+        if (index < 0) return
+        mOnBeforeClearListeners.removeAt(index)
+    }
+
+    /** 移除清除队列后的监听 */
+    override fun removeObserveOnAfterClearListener(lifecycleOwner: LifecycleOwner) {
+        val index = mOnAfterClearListeners.indexOfFirst { it.first == lifecycleOwner }
+        if (index < 0) return
+        mOnAfterClearListeners.removeAt(index)
     }
 
     /** 入栈新的任务 */

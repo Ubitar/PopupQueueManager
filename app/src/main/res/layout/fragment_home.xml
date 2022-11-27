@@ -37,6 +37,16 @@
         android:text="显示三个弹窗"
         android:textSize="20dp" />
 
+    <Button
+        android:id="@+id/btnClearGroup"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="清空队列"
+        android:textSize="20dp" />
+
     <TextView
         android:id="@+id/txtClear"
         android:layout_width="match_parent"

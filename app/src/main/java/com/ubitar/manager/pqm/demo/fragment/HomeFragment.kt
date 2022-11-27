@@ -108,6 +108,9 @@ class HomeFragment : Fragment() {
 
                 })
         }
+        mBinding.btnClearGroup.setOnClickListener {
+            PopupQueueManager.getDefault().clear()
+        }
         mBinding.txtClear.setOnClickListener {
             mTextAdapter.setList(arrayListOf())
         }
@@ -147,6 +150,16 @@ class HomeFragment : Fragment() {
         PopupQueueManager.getDefault()
             .observeOnNextTaskListener(viewLifecycleOwner) { group, task, popup ->
                 mTextAdapter.addData(0, "开始显示下一弹窗，现队列中的数量:${group.getCurrentSize()}个（包含当前弹窗）")
+                scrollToTop()
+            }
+        PopupQueueManager.getDefault()
+            .observeOnBeforeClearListener(viewLifecycleOwner){
+                mTextAdapter.addData(0, "清空当前队列前回调")
+                scrollToTop()
+            }
+        PopupQueueManager.getDefault()
+            .observeOnAfterClearListener(viewLifecycleOwner){
+                mTextAdapter.addData(0, "清空当前队列后回调")
                 scrollToTop()
             }
     }
