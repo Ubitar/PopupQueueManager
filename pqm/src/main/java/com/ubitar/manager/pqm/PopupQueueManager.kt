@@ -28,7 +28,7 @@ object PopupQueueManager {
     /** 获取指定分组 */
     fun get(groups: Groups): QueueGroup {
         return mGroupMap.getOrPut(groups) {
-            onCreateNewGroups()
+            onCreateNewGroups(groups)
         }
     }
 
@@ -79,8 +79,8 @@ object PopupQueueManager {
     }
 
     /** 创建新的分组 */
-    private fun onCreateNewGroups(): QueueGroup {
-        val group = LinkedQueueGroup()
+    private fun onCreateNewGroups(groups: Groups): QueueGroup {
+        val group = LinkedQueueGroup(groups)
         //添加队列结束的监听
         group.addOnGroupFinishListener {
             val isAllFinish = mGroupMap.all { it.value.getCurrentSize() <= 0 }

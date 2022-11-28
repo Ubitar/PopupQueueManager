@@ -6,7 +6,9 @@ import com.ubitar.manager.pqm.task.base.ITask
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class LinkedQueueGroup : QueueGroup() {
+class LinkedQueueGroup(
+    private val mGroups: Groups
+) : QueueGroup() {
 
     /** 任务开始前的延迟 */
     private var mBeforeDelay = -1L
@@ -24,6 +26,9 @@ class LinkedQueueGroup : QueueGroup() {
     private val mDelegate: IDelegate by lazy {
         QueueDelegate(mGroup = this, mQueue = mQueue)
     }
+
+    /** 返回分组标识 */
+    override fun groups(): Groups = mGroups
 
     /** 入栈新的任务 */
     override fun push(task: ITask) {

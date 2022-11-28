@@ -7,6 +7,9 @@ import com.ubitar.manager.pqm.task.base.ITask
  */
 interface IGroup {
 
+    /** 返回分组标识 */
+    fun groups():Groups
+
     /** 入栈新的任务 */
     fun push(task: ITask)
 
