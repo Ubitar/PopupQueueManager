@@ -3,8 +3,7 @@ package com.ubitar.manager.pqm
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.ubitar.manager.pqm.group.Groups
-import com.ubitar.manager.pqm.group.IGroup
-import com.ubitar.manager.pqm.group.LinkedQueueGroup
+import com.ubitar.manager.pqm.group.PriorityQueueGroup
 import com.ubitar.manager.pqm.group.QueueGroup
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -80,7 +79,7 @@ object PopupQueueManager {
 
     /** 创建新的分组 */
     private fun onCreateNewGroups(groups: Groups): QueueGroup {
-        val group = LinkedQueueGroup(groups)
+        val group = PriorityQueueGroup(groups)
         //添加队列结束的监听
         group.addOnGroupFinishListener {
             val isAllFinish = mGroupMap.all { it.value.getCurrentSize() <= 0 }

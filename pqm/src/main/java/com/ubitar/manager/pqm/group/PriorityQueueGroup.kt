@@ -4,9 +4,9 @@ import com.ubitar.manager.pqm.delegate.IDelegate
 import com.ubitar.manager.pqm.delegate.QueueDelegate
 import com.ubitar.manager.pqm.task.base.ITask
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.PriorityBlockingQueue
 
-class LinkedQueueGroup(
+class PriorityQueueGroup(
     private val mGroups: Groups
 ) : QueueGroup() {
 
@@ -20,7 +20,7 @@ class LinkedQueueGroup(
     private var mIsStopAfterFinish = false
 
     /** 任务队列 */
-    private val mQueue: Queue<ITask> = ConcurrentLinkedQueue()
+    private val mQueue: Queue<ITask> = PriorityBlockingQueue(10, QueueDelegate.COMPARATOR)
 
     /** 队列托管 */
     private val mDelegate: IDelegate by lazy {
