@@ -186,7 +186,7 @@ class QueueDelegate(
      * */
     private fun onRealCurrentTask(currentTask: ITask, isRetry: Boolean, onComplete: () -> Unit) {
         val onCreatedPopup = fun(task: ITask, popup: IQueuePopup) {
-            popup.onCatchQueueProxy(PopupQueueProxy {
+            popup.onCatchQueueProxy(PopupQueueProxy(task,mGroup) {
                 onComplete.invoke()
             })
             mGroup.mOnNextTaskListeners.forEach {
