@@ -6,6 +6,8 @@ abstract class QueueAsyncTask : IAsyncTask {
 
     private var mCurrentRetryCount = 0
 
+    private var mIsRunning = false
+
     override fun plushOneRetryCount() {
         mCurrentRetryCount++
     }
@@ -17,5 +19,15 @@ abstract class QueueAsyncTask : IAsyncTask {
     override fun getRetryCount(): Int {
         return super.getRetryCount()
     }
+
+    override fun onQueuePeek() {
+        mIsRunning = true
+    }
+
+    override fun onQueuePoll() {
+        mIsRunning = false
+    }
+
+    override fun isRunning(): Boolean = mIsRunning
 
 }

@@ -83,12 +83,14 @@ class QueueDelegate(
 
     /** 预备开始下一个任务 */
     private fun postToNextTask() {
-        mHandler.post {
-            if (!mIsRunning) return@post
-            if (mCurrentTask != null) return@post
-            if (getCurrentSize() <= 0) return@post
+        val onMainRun = fun() {
+            if (!mIsRunning) return
+            if (mCurrentTask != null) return
+            if (getCurrentSize() <= 0) return
             onDoingNextTask()
         }
+        if (Looper.myLooper() == Looper.getMainLooper()) onMainRun()
+        else mHandler.post { onMainRun() }
     }
 
     /**
@@ -97,7 +99,8 @@ class QueueDelegate(
      * */
     @MainThread
     private fun onDoingNextTask(isRetry: Boolean = false) {
-        val isStopAfterFinish = PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
+        val isStopAfterFinish =
+            PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
         if (mQueue.isEmpty()) {
             if (isStopAfterFinish) mIsRunning = false
             mGroup.mOnGroupFinishListeners.forEach { it.second.invoke(mGroup) }
@@ -114,6 +117,7 @@ class QueueDelegate(
 
         val currentTask = mQueue.peek() ?: return
         mCurrentTask = currentTask
+        currentTask.onQueuePeek()
 
         onBeforeNextTask(currentTask) {
 
@@ -186,7 +190,7 @@ class QueueDelegate(
      * */
     private fun onRealCurrentTask(currentTask: ITask, isRetry: Boolean, onComplete: () -> Unit) {
         val onCreatedPopup = fun(task: ITask, popup: IQueuePopup) {
-            popup.onCatchQueueProxy(PopupQueueProxy(task,mGroup) {
+            popup.onCatchQueueProxy(PopupQueueProxy(task, mGroup) {
                 onComplete.invoke()
             })
             mGroup.mOnNextTaskListeners.forEach {
@@ -268,6 +272,7 @@ class QueueDelegate(
     /** 清除当前任务 */
     private fun clearCurrentTask() {
         mQueue.poll()
+        mCurrentTask?.onQueuePoll()
         mCurrentTask = null
     }
 
@@ -287,9 +292,11 @@ class QueueDelegate(
 
     companion object {
         val COMPARATOR = Comparator<ITask> { o1, o2 ->
+            if (o1.isRunning() || o2.isRunning()) return@Comparator 0
+
             val p1 = o1?.getPriority() ?: 0
             val p2 = o2?.getPriority() ?: 0
-            p1 - p2
+            if(p1==p2) 1 else p1-p2
         }
     }
 

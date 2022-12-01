@@ -22,6 +22,15 @@ interface ITask {
     /** 任务优先级 */
     fun getPriority(): Int = DEFAULT_PRIORITY
 
+    /** peek出队列中 */
+    fun onQueuePeek()
+
+    /** poll出队列中 */
+    fun onQueuePoll()
+
+    /** 是否正在执行 */
+    fun isRunning():Boolean
+
     fun getTag(): String? = null
 
     companion object {
