@@ -6,11 +6,11 @@ abstract class QueueTask : ISyncTask {
 
     private var mIsRunning = false
 
-    override fun onQueuePeek() {
+    override fun onTaskStart() {
         mIsRunning = true
     }
 
-    override fun onQueuePoll() {
+    override fun onTaskFinish() {
         mIsRunning = false
     }
 

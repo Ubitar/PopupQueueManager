@@ -20,11 +20,11 @@ abstract class QueueAsyncTask : IAsyncTask {
         return super.getRetryCount()
     }
 
-    override fun onQueuePeek() {
+    override fun onTaskStart() {
         mIsRunning = true
     }
 
-    override fun onQueuePoll() {
+    override fun onTaskFinish() {
         mIsRunning = false
     }
 

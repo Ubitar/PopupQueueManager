@@ -22,11 +22,11 @@ interface ITask {
     /** 任务优先级 */
     fun getPriority(): Int = DEFAULT_PRIORITY
 
-    /** peek出队列中 */
-    fun onQueuePeek()
+    /** 任务开始 */
+    fun onTaskStart()
 
-    /** poll出队列中 */
-    fun onQueuePoll()
+    /** 任务完成 */
+    fun onTaskFinish()
 
     /** 是否正在执行 */
     fun isRunning():Boolean
