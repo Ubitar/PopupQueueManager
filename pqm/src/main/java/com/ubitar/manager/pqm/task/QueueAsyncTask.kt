@@ -24,7 +24,11 @@ abstract class QueueAsyncTask : IAsyncTask {
         mIsRunning = true
     }
 
-    override fun onTaskFinish() {
+    override fun onTaskRestart() {
+
+    }
+
+    override fun onTaskComplete() {
         mIsRunning = false
     }
 

@@ -117,7 +117,9 @@ class QueueDelegate(
 
         val currentTask = mQueue.peek() ?: return
         mCurrentTask = currentTask
-        currentTask.onTaskStart()
+
+        if(isRetry) currentTask.onTaskRestart()
+        else currentTask.onTaskStart()
 
         onBeforeNextTask(currentTask) {
 
@@ -133,6 +135,8 @@ class QueueDelegate(
                 onAfterCurrentTask(currentTask) {
 
                     onFinishCurrentTask()
+
+                    onCompleteCurrentTask()
 
                     onDoingNextTask()
 
@@ -264,6 +268,11 @@ class QueueDelegate(
         clearCurrentTask()
     }
 
+    /** 结束该任务后 */
+    private fun onCompleteCurrentTask(){
+        mCurrentTask?.onTaskComplete()
+    }
+
     /** 重试前重置当前任务 */
     private fun resetCurrentTask() {
         mCurrentTask = null
@@ -272,7 +281,6 @@ class QueueDelegate(
     /** 清除当前任务 */
     private fun clearCurrentTask() {
         mQueue.poll()
-        mCurrentTask?.onTaskFinish()
         mCurrentTask = null
     }
 

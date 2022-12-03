@@ -10,7 +10,11 @@ abstract class QueueTask : ISyncTask {
         mIsRunning = true
     }
 
-    override fun onTaskFinish() {
+    override fun onTaskRestart() {
+
+    }
+
+    override fun onTaskComplete() {
         mIsRunning = false
     }
 

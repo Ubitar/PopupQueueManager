@@ -25,11 +25,14 @@ interface ITask {
     /** 任务开始 */
     fun onTaskStart()
 
-    /** 任务完成 */
-    fun onTaskFinish()
+    /** 任务重新开始 */
+    fun onTaskRestart()
+
+    /** 任务结束 */
+    fun onTaskComplete()
 
     /** 是否正在执行 */
-    fun isRunning():Boolean
+    fun isRunning(): Boolean
 
     fun getTag(): String? = null
 
