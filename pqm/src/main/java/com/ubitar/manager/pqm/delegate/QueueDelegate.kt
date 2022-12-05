@@ -134,9 +134,9 @@ class QueueDelegate(
 
                 onAfterCurrentTask(currentTask) {
 
-                    onFinishCurrentTask()
+                    onFinishCurrentTask(currentTask)
 
-                    onCompleteCurrentTask()
+                    onCompleteCurrentTask(currentTask)
 
                     onDoingNextTask()
 
@@ -264,13 +264,13 @@ class QueueDelegate(
     }
 
     /** 完成该任务后 */
-    private fun onFinishCurrentTask() {
-        clearCurrentTask()
+    private fun onFinishCurrentTask(task: ITask) {
     }
 
     /** 结束该任务后 */
-    private fun onCompleteCurrentTask(){
-        mCurrentTask?.onTaskComplete()
+    private fun onCompleteCurrentTask(task: ITask){
+        clearCurrentTask()
+        task.onTaskComplete()
     }
 
     /** 重试前重置当前任务 */
