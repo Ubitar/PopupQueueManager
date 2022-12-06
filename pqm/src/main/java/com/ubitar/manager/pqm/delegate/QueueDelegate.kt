@@ -280,7 +280,9 @@ class QueueDelegate(
 
     /** 清除当前任务 */
     private fun clearCurrentTask() {
-        mQueue.poll()
+        val currentPeek = mQueue.peek()
+        if (currentPeek != null && currentPeek == mCurrentTask)
+            mQueue.poll()
         mCurrentTask = null
     }
 
