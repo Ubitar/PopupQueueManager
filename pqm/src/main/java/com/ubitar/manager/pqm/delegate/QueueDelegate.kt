@@ -101,13 +101,14 @@ class QueueDelegate(
     private fun onDoingNextTask(isRetry: Boolean = false) {
         val isStopAfterFinish =
             PopupQueueManager.getStopAfterFinish() || mGroup.getStopAfterFinish()
-        if (mQueue.isEmpty()) {
+        if (getCurrentSize() <= 0) {
             if (isStopAfterFinish) mIsRunning = false
             mGroup.mOnGroupFinishListeners.forEach { it.second.invoke(mGroup) }
             return
         }
 
         if (!mIsRunning) return
+        if (mCurrentTask != null) return
 
         val isInterruptGroup = onDispatchInterruptGroup()
         if (isInterruptGroup) {
@@ -118,7 +119,7 @@ class QueueDelegate(
         val currentTask = mQueue.peek() ?: return
         mCurrentTask = currentTask
 
-        if(isRetry) currentTask.onTaskRestart()
+        if (isRetry) currentTask.onTaskRestart()
         else currentTask.onTaskStart()
 
         onBeforeNextTask(currentTask) {
@@ -268,14 +269,16 @@ class QueueDelegate(
     }
 
     /** 结束该任务后 */
-    private fun onCompleteCurrentTask(task: ITask){
+    private fun onCompleteCurrentTask(task: ITask) {
         clearCurrentTask()
         task.onTaskComplete()
     }
 
     /** 重试前重置当前任务 */
     private fun resetCurrentTask() {
-        mCurrentTask = null
+        val currentPeek = mQueue.peek()
+        if (currentPeek != null && currentPeek == mCurrentTask)
+            mCurrentTask = null
     }
 
     /** 清除当前任务 */
@@ -306,7 +309,7 @@ class QueueDelegate(
 
             val p1 = o1?.getPriority() ?: 0
             val p2 = o2?.getPriority() ?: 0
-            if(p1==p2) 1 else p1-p2
+            if (p1 == p2) 1 else p1 - p2
         }
     }
 
