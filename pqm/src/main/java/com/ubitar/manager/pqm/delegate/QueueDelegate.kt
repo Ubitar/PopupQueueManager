@@ -110,11 +110,7 @@ class QueueDelegate(
         if (!mIsRunning) return
         if (mCurrentTask != null) return
 
-        val isInterruptGroup = onDispatchInterruptGroup()
-        if (isInterruptGroup) {
-            onInterruptGroup()
-            return
-        }
+        if (onDoingInterruptGroup()) return
 
         val currentTask = mQueue.peek() ?: return
 
@@ -153,8 +149,10 @@ class QueueDelegate(
     }
 
     /** 终止当前组 */
-    private fun onInterruptGroup() {
-        stop()
+    private fun onDoingInterruptGroup(): Boolean {
+        val isIntercept = onDispatchInterruptGroup()
+        if (isIntercept) stop()
+        return isIntercept
     }
 
     /**
@@ -177,10 +175,8 @@ class QueueDelegate(
         if (beforeTaskDelay > 0) {
             mDelayTimer?.cancel()
             mDelayTimer = delayWith(beforeTaskDelay) {
-                val isInterruptGroup = onDispatchInterruptGroup()
-                if (isInterruptGroup) {
-                    onInterruptGroup()
-                } else {
+                val isInterruptGroup = onDoingInterruptGroup()
+                if (!isInterruptGroup) {
                     onComplete.invoke()
                 }
             }
