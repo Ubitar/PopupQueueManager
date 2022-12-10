@@ -15,7 +15,7 @@ import java.util.*
 
 class QueueDelegate(
     private val mGroup: QueueGroup,
-    private val mQueue: Queue<ITask>,
+    private val mQueue: LinkedList<ITask>,
 ) : IDelegate {
 
     /** 队列是否正在运行 */
@@ -31,6 +31,7 @@ class QueueDelegate(
     private val mHandler = Handler(Looper.getMainLooper())
 
     /** 入栈新的任务 */
+    @Synchronized
     override fun push(task: ITask) {
         mQueue.add(task)
         if (mQueue is List<*>)
@@ -39,6 +40,7 @@ class QueueDelegate(
     }
 
     /** 入栈新的任务且运行队列 */
+    @Synchronized
     override fun pushAndStart(task: ITask) {
         mQueue.add(task)
         if (mQueue is List<*>)
@@ -303,11 +305,10 @@ class QueueDelegate(
 
     companion object {
         val COMPARATOR = Comparator<ITask> { o1, o2 ->
-            if (o1.isRunning() || o2.isRunning()) return@Comparator 0
-
-            val p1 = o1?.getPriority() ?: 0
-            val p2 = o2?.getPriority() ?: 0
-            if (p1 == p2) 1 else p1 - p2
+            val priority1 = o1?.getPriority() ?: 0
+            val priority2 = o2?.getPriority() ?: 0
+            if (o1.isRunning() || o2.isRunning()) 0
+            else priority1 - priority2
         }
     }
 
