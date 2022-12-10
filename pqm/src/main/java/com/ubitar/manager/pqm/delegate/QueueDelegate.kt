@@ -117,19 +117,15 @@ class QueueDelegate(
         }
 
         val currentTask = mQueue.peek() ?: return
+
+        if (onDoingInterceptTask(currentTask)) return
+
         mCurrentTask = currentTask
 
         if (isRetry) currentTask.onTaskRestart()
         else currentTask.onTaskStart()
 
         onBeforeNextTask(currentTask) {
-
-            val isIntercept = onDispatchInterceptTask(currentTask)
-
-            if (isIntercept) {
-                onInterceptTask()
-                return@onBeforeNextTask
-            }
 
             onRealCurrentTask(currentTask, isRetry) {
 
@@ -161,10 +157,14 @@ class QueueDelegate(
         stop()
     }
 
-    /** 拦截当前任务 */
-    private fun onInterceptTask() {
-        clearCurrentTask()
-        onDoingNextTask()
+    /**
+     *  拦截当前任务
+     * @return true为拦截此次任务，不继续分发
+     */
+    private fun onDoingInterceptTask(task: ITask) :Boolean{
+        val isIntercept = onDispatchInterceptTask(task)
+        if(isIntercept) onDoingNextTask()
+        return isIntercept
     }
 
     /** 任务开始前 */
