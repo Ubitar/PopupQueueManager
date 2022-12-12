@@ -45,34 +45,6 @@ class HomeFragment : Fragment() {
 
                 })
         }
-        mBinding.btnTwoPopup.setOnClickListener {
-            PopupQueueManager.getDefault()
-                .push(object : QueueTask() {
-                    override fun onCreatePopup(): IQueuePopup? {
-                        return ColorDialog(Color.RED)
-                    }
-
-                    override fun show(popup: IQueuePopup) {
-                        showDialog(popup as DialogFragment)
-                    }
-
-                })
-            //仅放入，不开启队列
-            PopupQueueManager.getDefault()
-                .push(object : QueueTask() {
-                    override fun onCreatePopup(): IQueuePopup? {
-                        return ColorPopup(requireContext(), Color.GREEN)
-                    }
-
-                    override fun show(popup: IQueuePopup) {
-                        showPopup(popup as BasePopupView)
-                    }
-
-                })
-            //开启队列
-            PopupQueueManager.getDefault()
-                .start()
-        }
         mBinding.btnThreePopup.setOnClickListener {
             PopupQueueManager.getDefault()
                 .push(object : QueueTask() {
@@ -97,7 +69,7 @@ class HomeFragment : Fragment() {
 
                 })
             PopupQueueManager.getDefault()
-                .pushAndStart(object : QueueTask() {
+                .push(object : QueueTask() {
                     override fun onCreatePopup(): IQueuePopup? {
                         return ColorPopup(requireContext(), Color.BLUE)
                     }
@@ -106,6 +78,82 @@ class HomeFragment : Fragment() {
                         showPopup(popup as BasePopupView)
                     }
 
+                })
+            PopupQueueManager.getDefault().start()
+        }
+        mBinding.btnFivePopup.setOnClickListener {
+            //由于有不同优先级的任务，所以此处优暂停队列，否则弹窗队列会优先执行放入的第一个任务，而不是优先执行优先度最高的
+            PopupQueueManager.getDefault().stop()
+            PopupQueueManager.getDefault()
+                .push(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.RED)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+
+                    override fun getPriority(): Int = 96
+                })
+            PopupQueueManager.getDefault()
+                .push(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.GREEN)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+
+                    override fun getPriority(): Int = 97
+                })
+            PopupQueueManager.getDefault()
+                .push(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.BLUE)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+                    override fun getPriority(): Int = 97
+
+                })
+            PopupQueueManager.getDefault()
+                .push(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.YELLOW)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+                    override fun getPriority(): Int = 97
+                })
+            PopupQueueManager.getDefault()
+                .push(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.GRAY)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+                    override fun getPriority(): Int = 97
+
+                })
+            PopupQueueManager.getDefault()
+                //添加任务且开始队列
+                .pushAndStart(object : QueueTask() {
+                    override fun onCreatePopup(): IQueuePopup? {
+                        return ColorPopup(requireContext(), Color.BLACK)
+                    }
+
+                    override fun show(popup: IQueuePopup) {
+                        showPopup(popup as BasePopupView)
+                    }
+                    override fun getPriority(): Int = 93
                 })
         }
         mBinding.btnClearGroup.setOnClickListener {

@@ -18,16 +18,6 @@
         android:textSize="20dp" />
 
     <Button
-        android:id="@+id/btnTwoPopup"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginTop="2dp"
-        android:gravity="center"
-        android:text="显示两个弹窗"
-        android:textSize="20dp" />
-
-    <Button
         android:id="@+id/btnThreePopup"
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -35,6 +25,16 @@
         android:layout_marginTop="2dp"
         android:gravity="center"
         android:text="显示三个弹窗"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btnFivePopup"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="显示五个不同优先级的弹窗"
         android:textSize="20dp" />
 
     <Button
