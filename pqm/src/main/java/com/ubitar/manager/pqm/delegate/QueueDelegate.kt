@@ -125,18 +125,24 @@ class QueueDelegate(
 
         onBeforeNextTask(currentTask) {
 
-            onRealCurrentTask(currentTask, isRetry) {
+            onRealCurrentTask(
+                currentTask,
+                isRetry,
+                onNextStep = {
+                    onAfterCurrentTask(currentTask) {
 
-                onAfterCurrentTask(currentTask) {
+                        onFinishCurrentTask(currentTask)
 
-                    onFinishCurrentTask(currentTask)
+                        onCompleteCurrentTask(currentTask)
 
+                        onDoingNextTask()
+
+                    }
+                },
+                onFailStep = {
                     onCompleteCurrentTask(currentTask)
-
-                    onDoingNextTask()
-
-                }
-            }
+                    onDoingNextTask(true)
+                })
         }
     }
 
@@ -161,9 +167,9 @@ class QueueDelegate(
      *  拦截当前任务
      * @return true为拦截此次任务，不继续分发
      */
-    private fun onDoingInterceptTask(task: ITask) :Boolean{
+    private fun onDoingInterceptTask(task: ITask): Boolean {
         val isIntercept = onDispatchInterceptTask(task)
-        if(isIntercept) onDoingNextTask()
+        if (isIntercept) onDoingNextTask()
         return isIntercept
     }
 
@@ -191,11 +197,16 @@ class QueueDelegate(
      * 真正执行当前任务
      * @param isRetry 是否是重试任务
      * */
-    private fun onRealCurrentTask(currentTask: ITask, isRetry: Boolean, onComplete: () -> Unit) {
+    private fun onRealCurrentTask(
+        currentTask: ITask,
+        isRetry: Boolean,
+        onNextStep: () -> Unit,
+        onFailStep: () -> Unit
+    ) {
         val onCreatedPopup = fun(task: ITask, popup: IQueuePopup) {
             popup.onCatchQueueProxy(PopupQueueProxy(task, mGroup) {
-                if (mCurrentTask != null && currentTask == mCurrentTask)
-                    onComplete.invoke()
+                if (!isTaskAlive(currentTask)) return@PopupQueueProxy
+                onNextStep.invoke()
             })
             mGroup.mOnNextTaskListeners.forEach {
                 it.second.invoke(mGroup, task, popup)
@@ -204,18 +215,18 @@ class QueueDelegate(
             return
         }
         val onFailPopup = fun(task: ITask) {
+            if (!isTaskAlive(currentTask)) return
             if (task is ITaskRetry) {
                 if (task.getRetryCount() > task.getCurrentRetryCount()) {
-                    resetCurrentTask()
-                    onDoingNextTask(true)
-                } else if (mCurrentTask != null && currentTask == mCurrentTask){
-                    onComplete.invoke()
+                    onFailStep.invoke()
                 }
+            } else {
+                onNextStep.invoke()
             }
         }
         val onCancelPopup = fun(task: ITask) {
-            if (mCurrentTask != null && currentTask == mCurrentTask)
-                onComplete.invoke()
+            if (!isTaskAlive(currentTask)) return
+            onNextStep.invoke()
         }
 
         if (isRetry) {
@@ -268,11 +279,12 @@ class QueueDelegate(
 
     /** 完成该任务后 */
     private fun onFinishCurrentTask(task: ITask) {
+        clearCurrentTask()
     }
 
     /** 结束该任务后 */
     private fun onCompleteCurrentTask(task: ITask) {
-        clearCurrentTask()
+        resetCurrentTask()
         task.onTaskComplete()
     }
 
@@ -287,6 +299,11 @@ class QueueDelegate(
         if (currentPeek != null && currentPeek == mCurrentTask)
             mQueue.poll()
         mCurrentTask = null
+    }
+
+    /** 判断人物是否处在存活状态 */
+    private fun isTaskAlive(currentTask: ITask): Boolean {
+        return mCurrentTask != null && currentTask == mCurrentTask
     }
 
     /** 延迟器 */
