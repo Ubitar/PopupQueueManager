@@ -14,6 +14,14 @@ abstract class QueueTask : ISyncTask {
 
     }
 
+    override fun onTaskCancel() {
+
+    }
+
+    override fun onTaskFinish() {
+
+    }
+
     override fun onTaskComplete() {
         mIsRunning = false
     }

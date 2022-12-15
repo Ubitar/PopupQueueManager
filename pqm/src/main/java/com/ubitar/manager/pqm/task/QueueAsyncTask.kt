@@ -28,6 +28,18 @@ abstract class QueueAsyncTask : IAsyncTask {
 
     }
 
+    override fun onTaskCancel() {
+
+    }
+
+    override fun onTaskFail(currentRetry: Int, retryCount: Int) {
+
+    }
+
+    override fun onTaskFinish() {
+
+    }
+
     override fun onTaskComplete() {
         mIsRunning = false
     }

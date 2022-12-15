@@ -218,6 +218,7 @@ class QueueDelegate(
             if (!isTaskAlive(currentTask)) return
             if (task is ITaskRetry) {
                 if (task.getRetryCount() > task.getCurrentRetryCount()) {
+                    task.onTaskFail(task.getCurrentRetryCount(), task.getRetryCount())
                     onFailStep.invoke()
                 }
             } else {
@@ -226,6 +227,7 @@ class QueueDelegate(
         }
         val onCancelPopup = fun(task: ITask) {
             if (!isTaskAlive(currentTask)) return
+            task.onTaskCancel()
             onNextStep.invoke()
         }
 
@@ -280,6 +282,7 @@ class QueueDelegate(
     /** 完成该任务后 */
     private fun onFinishCurrentTask(task: ITask) {
         clearCurrentTask()
+        task.onTaskFinish()
     }
 
     /** 结束该任务后 */

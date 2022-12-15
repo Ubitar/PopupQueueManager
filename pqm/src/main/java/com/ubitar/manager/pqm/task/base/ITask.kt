@@ -28,6 +28,12 @@ interface ITask {
     /** 任务重新开始 */
     fun onTaskRestart()
 
+    /** 任务取消 */
+    fun onTaskCancel()
+
+    /** 任务完成 */
+    fun onTaskFinish()
+
     /** 任务结束 */
     fun onTaskComplete()
 
